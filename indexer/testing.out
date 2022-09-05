@@ -1,0 +1,260 @@
+bash -v testing.sh
+#!/bin/bash
+#
+# testing.sh - tests various cases for indexer
+#
+# Ryan Yong, May 2021
+#
+
+mkdir testOut
+sharedOut="/thayerfs/home/f004gx3/cs50-dev/shared/tse"
+check="valgrind --leak-check=full --show-leak-kinds=all"
+
+# Test cases for argument bounds
+# No arguments provided
+./indexer
+Invalid number of arguments.
+Format: pageDirectory indexFilename
+
+# One argument provided
+./indexer $sharedOut/output/letters-0
+Invalid number of arguments.
+Format: pageDirectory indexFilename
+
+# Two arguments provided but invalid pageDirectory
+./indexer asdfsadfasdfafsdfdsaafds testOut/twoArgIPD.index
+Error: file "asdfsadfasdfafsdfdsaafds/.crawler" does not exist.
+
+# Two arguments provided but invalid indexFilename
+./indexer $sharedOut/output/letters-0 asdfasdfasdfasdfasf/twoArgIIF.index
+Error: path "asdfasdfasdfasdfasf/twoArgIIF.index" is invalid.
+
+# Two arguments provided but both invalid
+./indexer asdfasdfasdfasdfasdf asdfasdfasdfasdasdf/twoArgN.index
+Error: file "asdfasdfasdfasdfasdf/.crawler" does not exist.
+
+# Three arguments provided
+./indexer $sharedOut/output/letters-0 testOut/letters-0.index $sharedOut
+Invalid number of arguments.
+Format: pageDirectory indexFilename
+
+# Testing cases with valid arguments
+# letters testing with depth 0
+./indexer $sharedOut/output/letters-0 testOut/letters-0.index
+
+$sharedOut/indexcmp $sharedOut/output/letters-0.index testOut/letters-0.index
+
+./indextest $sharedOut/output/letters-0.index testOut/newLetters-0.index
+
+$sharedOut/indexcmp $sharedOut/output/letters-0.index testOut/newLetters-0.index
+
+# letters testing with depth 10
+./indexer $sharedOut/output/letters-10 testOut/letters-10.index
+
+$sharedOut/indexcmp $sharedOut/output/letters-10.index testOut/letters-10.index
+
+./indextest $sharedOut/output/letters-10.index testOut/newLetters-10.index
+
+$sharedOut/indexcmp $sharedOut/output/letters-10.index testOut/newLetters-10.index
+
+# toscrape testing with depth 0
+./indexer $sharedOut/output/toscrape-0 testOut/toscrape-0.index
+
+$sharedOut/indexcmp $sharedOut/output/toscrape-0.index testOut/toscrape-0.index
+
+./indextest $sharedOut/output/toscrape-0.index testOut/newToscrape-0.index
+
+$sharedOut/indexcmp $sharedOut/output/toscrape-0.index testOut/newToscrape-0.index
+
+# toscrape testing with depth 1
+./indexer $sharedOut/output/toscrape-1 testOut/toscrape-1.index
+
+$sharedOut/indexcmp $sharedOut/output/toscrape-1.index testOut/toscrape-1.index
+
+./indextest $sharedOut/output/toscrape-1.index testOut/newToscrape-1.index
+
+$sharedOut/indexcmp $sharedOut/output/toscrape-1.index testOut/newToscrape-1.index
+
+# wikipedia testing with depth 0
+./indexer $sharedOut/output/wikipedia-0 testOut/wikipedia-0.index
+
+$sharedOut/indexcmp $sharedOut/output/wikipedia-0.index testOut/wikipedia-0.index
+
+./indextest $sharedOut/output/wikipedia-0.index testOut/newWikipedia-0.index
+
+$sharedOut/indexcmp $sharedOut/output/wikipedia-0.index testOut/newWikipedia-0.index
+
+# wikipedia testing with depth 1
+./indexer $sharedOut/output/wikipedia-1 testOut/wikipedia-1.index
+
+$sharedOut/indexcmp $sharedOut/output/wikipedia-1.index testOut/wikipedia-1.index
+
+./indextest $sharedOut/output/wikipedia-1.index testOut/newWikipedia-1.index
+
+$sharedOut/indexcmp $sharedOut/output/wikipedia-1.index testOut/newWikipedia-1.index
+
+# Testing with valgrind
+# letters testing with depth 0
+$check ./indexer $sharedOut/output/letters-0 testOut/letters-0.index
+==40278== Memcheck, a memory error detector
+==40278== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==40278== Using Valgrind-3.13.0 and LibVEX; rerun with -h for copyright info
+==40278== Command: ./indexer /thayerfs/home/f004gx3/cs50-dev/shared/tse/output/letters-0 testOut/letters-0.index
+==40278== 
+==40278== 
+==40278== HEAP SUMMARY:
+==40278==     in use at exit: 0 bytes in 0 blocks
+==40278==   total heap usage: 773 allocs, 773 frees, 64,181 bytes allocated
+==40278== 
+==40278== All heap blocks were freed -- no leaks are possible
+==40278== 
+==40278== For counts of detected and suppressed errors, rerun with: -v
+==40278== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+
+$check ./indextest $sharedOut/output/letters-0.index testOut/newLetters-0.index
+==40315== Memcheck, a memory error detector
+==40315== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==40315== Using Valgrind-3.13.0 and LibVEX; rerun with -h for copyright info
+==40315== Command: ./indextest /thayerfs/home/f004gx3/cs50-dev/shared/tse/output/letters-0.index testOut/newLetters-0.index
+==40315== 
+==40315== 
+==40315== HEAP SUMMARY:
+==40315==     in use at exit: 0 bytes in 0 blocks
+==40315==   total heap usage: 54 allocs, 54 frees, 19,901 bytes allocated
+==40315== 
+==40315== All heap blocks were freed -- no leaks are possible
+==40315== 
+==40315== For counts of detected and suppressed errors, rerun with: -v
+==40315== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+
+# letters testing with depth 10
+$check ./indexer $sharedOut/output/letters-10 testOut/letters-10.index
+==40322== Memcheck, a memory error detector
+==40322== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==40322== Using Valgrind-3.13.0 and LibVEX; rerun with -h for copyright info
+==40322== Command: ./indexer /thayerfs/home/f004gx3/cs50-dev/shared/tse/output/letters-10 testOut/letters-10.index
+==40322== 
+==40322== 
+==40322== HEAP SUMMARY:
+==40322==     in use at exit: 0 bytes in 0 blocks
+==40322==   total heap usage: 1,854 allocs, 1,854 frees, 317,663 bytes allocated
+==40322== 
+==40322== All heap blocks were freed -- no leaks are possible
+==40322== 
+==40322== For counts of detected and suppressed errors, rerun with: -v
+==40322== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+
+$check ./indextest $sharedOut/output/letters-10.index testOut/newLetters-10.index
+==40554== Memcheck, a memory error detector
+==40554== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==40554== Using Valgrind-3.13.0 and LibVEX; rerun with -h for copyright info
+==40554== Command: ./indextest /thayerfs/home/f004gx3/cs50-dev/shared/tse/output/letters-10.index testOut/newLetters-10.index
+==40554== 
+==40554== 
+==40554== HEAP SUMMARY:
+==40554==     in use at exit: 0 bytes in 0 blocks
+==40554==   total heap usage: 162 allocs, 162 frees, 22,486 bytes allocated
+==40554== 
+==40554== All heap blocks were freed -- no leaks are possible
+==40554== 
+==40554== For counts of detected and suppressed errors, rerun with: -v
+==40554== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+
+# toscrape testing with depth 0
+$check ./indexer $sharedOut/output/toscrape-0 testOut/toscrape-0.index
+==40560== Memcheck, a memory error detector
+==40560== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==40560== Using Valgrind-3.13.0 and LibVEX; rerun with -h for copyright info
+==40560== Command: ./indexer /thayerfs/home/f004gx3/cs50-dev/shared/tse/output/toscrape-0 testOut/toscrape-0.index
+==40560== 
+==40560== 
+==40560== HEAP SUMMARY:
+==40560==     in use at exit: 0 bytes in 0 blocks
+==40560==   total heap usage: 52,749 allocs, 52,749 frees, 1,315,681,372 bytes allocated
+==40560== 
+==40560== All heap blocks were freed -- no leaks are possible
+==40560== 
+==40560== For counts of detected and suppressed errors, rerun with: -v
+==40560== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+
+$check ./indextest $sharedOut/output/toscrape-0.index testOut/newToscrape-0.index
+==40608== Memcheck, a memory error detector
+==40608== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==40608== Using Valgrind-3.13.0 and LibVEX; rerun with -h for copyright info
+==40608== Command: ./indextest /thayerfs/home/f004gx3/cs50-dev/shared/tse/output/toscrape-0.index testOut/newToscrape-0.index
+==40608== 
+==40608== 
+==40608== HEAP SUMMARY:
+==40608==     in use at exit: 0 bytes in 0 blocks
+==40608==   total heap usage: 816 allocs, 816 frees, 39,264 bytes allocated
+==40608== 
+==40608== All heap blocks were freed -- no leaks are possible
+==40608== 
+==40608== For counts of detected and suppressed errors, rerun with: -v
+==40608== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+
+# toscrape testing with depth 1
+$check ./indexer $sharedOut/output/toscrape-1 testOut/toscrape-1.index
+==40633== Memcheck, a memory error detector
+==40633== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==40633== Using Valgrind-3.13.0 and LibVEX; rerun with -h for copyright info
+==40633== Command: ./indexer /thayerfs/home/f004gx3/cs50-dev/shared/tse/output/toscrape-1 testOut/toscrape-1.index
+==40633== 
+==40633== 
+==40633== HEAP SUMMARY:
+==40633==     in use at exit: 0 bytes in 0 blocks
+==40633==   total heap usage: 2,336,962 allocs, 2,336,962 frees, 42,742,635,536 bytes allocated
+==40633== 
+==40633== All heap blocks were freed -- no leaks are possible
+==40633== 
+==40633== For counts of detected and suppressed errors, rerun with: -v
+==40633== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+
+$check ./indextest $sharedOut/output/toscrape-1.index testOut/newToscrape-1.index
+==42190== Memcheck, a memory error detector
+==42190== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==42190== Using Valgrind-3.13.0 and LibVEX; rerun with -h for copyright info
+==42190== Command: ./indextest /thayerfs/home/f004gx3/cs50-dev/shared/tse/output/toscrape-1.index testOut/newToscrape-1.index
+==42190== 
+==42190== 
+==42190== HEAP SUMMARY:
+==42190==     in use at exit: 0 bytes in 0 blocks
+==42190==   total heap usage: 21,184 allocs, 21,184 frees, 489,212 bytes allocated
+==42190== 
+==42190== All heap blocks were freed -- no leaks are possible
+==42190== 
+==42190== For counts of detected and suppressed errors, rerun with: -v
+==42190== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+
+# wikipedia testing with depth 0
+$check ./indexer $sharedOut/output/wikipedia-0 testOut/wikipedia-0.index
+==42207== Memcheck, a memory error detector
+==42207== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==42207== Using Valgrind-3.13.0 and LibVEX; rerun with -h for copyright info
+==42207== Command: ./indexer /thayerfs/home/f004gx3/cs50-dev/shared/tse/output/wikipedia-0 testOut/wikipedia-0.index
+==42207== 
+==42207== 
+==42207== HEAP SUMMARY:
+==42207==     in use at exit: 0 bytes in 0 blocks
+==42207==   total heap usage: 7,109 allocs, 7,109 frees, 19,526,590 bytes allocated
+==42207== 
+==42207== All heap blocks were freed -- no leaks are possible
+==42207== 
+==42207== For counts of detected and suppressed errors, rerun with: -v
+==42207== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+
+$check ./indextest $sharedOut/output/wikipedia-0.index testOut/newWikipedia-0.index
+==42235== Memcheck, a memory error detector
+==42235== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==42235== Using Valgrind-3.13.0 and LibVEX; rerun with -h for copyright info
+==42235== Command: ./indextest /thayerfs/home/f004gx3/cs50-dev/shared/tse/output/wikipedia-0.index testOut/newWikipedia-0.index
+==42235== 
+==42235== 
+==42235== HEAP SUMMARY:
+==42235==     in use at exit: 0 bytes in 0 blocks
+==42235==   total heap usage: 258 allocs, 258 frees, 25,089 bytes allocated
+==42235== 
+==42235== All heap blocks were freed -- no leaks are possible
+==42235== 
+==42235== For counts of detected and suppressed errors, rerun with: -v
+==42235== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)

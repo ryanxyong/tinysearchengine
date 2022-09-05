@@ -1,0 +1,621 @@
+bash -v testing.sh
+#!/bin/bash
+#
+# testing.sh - tests various cases for querier
+#
+# Ryan Yong, May 2021
+#
+
+sharedOut="/thayerfs/home/f004gx3/cs50-dev/shared/tse/output"
+check="valgrind --leak-check=full --show-leak-kinds=all"
+
+# Test cases for argument bounds
+# No arguments provided
+./querier < testFiles/fuzzTestQueriesLetters10
+Invalid number of arguments.
+Format: pageDirectory indexFilename
+
+# One argument provided
+./querier $sharedOut/letters-10 < testFiles/fuzzTestQueriesLetters10
+Invalid number of arguments.
+Format: pageDirectory indexFilename
+
+# Two arguments provided but invalid pageDirectory
+./querier adsdfssadfdafdsaf $sharedOut/letters-10.index < testFiles/fuzzTestQueriesLetters10
+Error: file "adsdfssadfdafdsaf/.crawler" does not exist.
+
+# Two arguments provided by both invalid
+./querier asdffdsasdfasdfa sdafsfdadfasfda < testFiles/fuzzTestQueriesLetters10
+Error: file "asdffdsasdfasdfa/.crawler" does not exist.
+
+# Three argument provided
+./querier $sharedOut/letters-10 $sharedOut/letters-10.index $sharedOut/letters-0 < testFiles/fuzzTestQueriesLetters10
+Invalid number of arguments.
+Format: pageDirectory indexFilename
+
+
+# Test cases with valid arguments and invalid queries
+# letters testing with depth 10
+./querier $sharedOut/letters-10 $sharedOut/letters-10.index < testFiles/invalidTestQueries
+Error: bad character '-' in query.
+Error: bad character '-' in query.
+Error: bad character '9' in query.
+Error: bad character ''' in query.
+Error: bad character '3' in query.
+Error: bad character '-' in query.
+Error: 'and' cannot be first
+Error: 'and' cannot be first
+Error: 'and' cannot be last
+Error: 'and' cannot be first
+Error: 'and' and 'and' cannot be adjacent
+Error: 'and' and 'or' cannot be adjacent
+Error: 'or' and 'and' cannot be adjacent
+Error: 'or' and 'or' cannot be adjacent
+Query? Query: 
+-----------------------------------------------
+Query? Query: 
+-----------------------------------------------
+Query? Query: 
+-----------------------------------------------
+Query? Query: 
+-----------------------------------------------
+Query? Query: 
+-----------------------------------------------
+Query? Query: 
+-----------------------------------------------
+Query? Query: and 
+-----------------------------------------------
+Query? Query: and 
+-----------------------------------------------
+Query? Query: hello and 
+-----------------------------------------------
+Query? Query: and hello 
+-----------------------------------------------
+Query? Query: hello and and constant 
+-----------------------------------------------
+Query? Query: hello and or constant 
+-----------------------------------------------
+Query? Query: hello or and constant 
+-----------------------------------------------
+Query? Query: hello or or constant 
+-----------------------------------------------
+Query? 
+# wikipedia testing with depth 1
+./querier $sharedOut/wikipedia-1 $sharedOut/wikipedia-1.index < testFiles/invalidTestQueries
+Error: bad character '-' in query.
+Error: bad character '-' in query.
+Error: bad character '9' in query.
+Error: bad character ''' in query.
+Error: bad character '3' in query.
+Error: bad character '-' in query.
+Error: 'and' cannot be first
+Error: 'and' cannot be first
+Error: 'and' cannot be last
+Error: 'and' cannot be first
+Error: 'and' and 'and' cannot be adjacent
+Error: 'and' and 'or' cannot be adjacent
+Error: 'or' and 'and' cannot be adjacent
+Error: 'or' and 'or' cannot be adjacent
+Query? Query: 
+-----------------------------------------------
+Query? Query: 
+-----------------------------------------------
+Query? Query: 
+-----------------------------------------------
+Query? Query: 
+-----------------------------------------------
+Query? Query: 
+-----------------------------------------------
+Query? Query: 
+-----------------------------------------------
+Query? Query: and 
+-----------------------------------------------
+Query? Query: and 
+-----------------------------------------------
+Query? Query: hello and 
+-----------------------------------------------
+Query? Query: and hello 
+-----------------------------------------------
+Query? Query: hello and and constant 
+-----------------------------------------------
+Query? Query: hello and or constant 
+-----------------------------------------------
+Query? Query: hello or and constant 
+-----------------------------------------------
+Query? Query: hello or or constant 
+-----------------------------------------------
+Query? 
+# Test cases with valgrind with valid arguments and invalid queries
+# letters testing with depth 10
+$check ./querier $sharedOut/letters-10 $sharedOut/letters-10.index < testFiles/invalidTestQueries
+==12449== Memcheck, a memory error detector
+==12449== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==12449== Using Valgrind-3.13.0 and LibVEX; rerun with -h for copyright info
+==12449== Command: ./querier /thayerfs/home/f004gx3/cs50-dev/shared/tse/output/letters-10 /thayerfs/home/f004gx3/cs50-dev/shared/tse/output/letters-10.index
+==12449== 
+Error: bad character '-' in query.
+Error: bad character '-' in query.
+Error: bad character '9' in query.
+Error: bad character ''' in query.
+Error: bad character '3' in query.
+Error: bad character '-' in query.
+Error: 'and' cannot be first
+Error: 'and' cannot be first
+Error: 'and' cannot be last
+Error: 'and' cannot be first
+Error: 'and' and 'and' cannot be adjacent
+Error: 'and' and 'or' cannot be adjacent
+Error: 'or' and 'and' cannot be adjacent
+Error: 'or' and 'or' cannot be adjacent
+Query? Query: 
+-----------------------------------------------
+Query? Query: 
+-----------------------------------------------
+Query? Query: 
+-----------------------------------------------
+Query? Query: 
+-----------------------------------------------
+Query? Query: 
+-----------------------------------------------
+Query? Query: 
+-----------------------------------------------
+Query? Query: and 
+-----------------------------------------------
+Query? Query: and 
+-----------------------------------------------
+Query? Query: hello and 
+-----------------------------------------------
+Query? Query: and hello 
+-----------------------------------------------
+Query? Query: hello and and constant 
+-----------------------------------------------
+Query? Query: hello and or constant 
+-----------------------------------------------
+Query? Query: hello or and constant 
+-----------------------------------------------
+Query? Query: hello or or constant 
+-----------------------------------------------
+Query? ==12449== 
+==12449== HEAP SUMMARY:
+==12449==     in use at exit: 0 bytes in 0 blocks
+==12449==   total heap usage: 177 allocs, 177 frees, 31,383 bytes allocated
+==12449== 
+==12449== All heap blocks were freed -- no leaks are possible
+==12449== 
+==12449== For counts of detected and suppressed errors, rerun with: -v
+==12449== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+
+# wikipedia testing with depth 1
+$check ./querier $sharedOut/wikipedia-1 $sharedOut/wikipedia-1.index < testFiles/invalidTestQueries
+==12450== Memcheck, a memory error detector
+==12450== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==12450== Using Valgrind-3.13.0 and LibVEX; rerun with -h for copyright info
+==12450== Command: ./querier /thayerfs/home/f004gx3/cs50-dev/shared/tse/output/wikipedia-1 /thayerfs/home/f004gx3/cs50-dev/shared/tse/output/wikipedia-1.index
+==12450== 
+Error: bad character '-' in query.
+Error: bad character '-' in query.
+Error: bad character '9' in query.
+Error: bad character ''' in query.
+Error: bad character '3' in query.
+Error: bad character '-' in query.
+Error: 'and' cannot be first
+Error: 'and' cannot be first
+Error: 'and' cannot be last
+Error: 'and' cannot be first
+Error: 'and' and 'and' cannot be adjacent
+Error: 'and' and 'or' cannot be adjacent
+Error: 'or' and 'and' cannot be adjacent
+Error: 'or' and 'or' cannot be adjacent
+Query? Query: 
+-----------------------------------------------
+Query? Query: 
+-----------------------------------------------
+Query? Query: 
+-----------------------------------------------
+Query? Query: 
+-----------------------------------------------
+Query? Query: 
+-----------------------------------------------
+Query? Query: 
+-----------------------------------------------
+Query? Query: and 
+-----------------------------------------------
+Query? Query: and 
+-----------------------------------------------
+Query? Query: hello and 
+-----------------------------------------------
+Query? Query: and hello 
+-----------------------------------------------
+Query? Query: hello and and constant 
+-----------------------------------------------
+Query? Query: hello and or constant 
+-----------------------------------------------
+Query? Query: hello or and constant 
+-----------------------------------------------
+Query? Query: hello or or constant 
+-----------------------------------------------
+Query? ==12450== 
+==12450== HEAP SUMMARY:
+==12450==     in use at exit: 0 bytes in 0 blocks
+==12450==   total heap usage: 45,059 allocs, 45,059 frees, 1,121,912 bytes allocated
+==12450== 
+==12450== All heap blocks were freed -- no leaks are possible
+==12450== 
+==12450== For counts of detected and suppressed errors, rerun with: -v
+==12450== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+
+
+# Test cases with valid arguments and valid queries (with extra white spaces or capitalizations)
+# letters testing with depth 10
+./querier $sharedOut/letters-10 $sharedOut/letters-10.index < testFiles/formattingTestQueries
+Query? Query: 
+-----------------------------------------------
+Query? Query: sadfdasdsaffds 
+No documents match.
+-----------------------------------------------
+Query? Query: 
+-----------------------------------------------
+Query? Query: adfasdf adsds fdsfds d fdsdf sdfs dfs adfoi adsoif jdaio aj 
+No documents match.
+-----------------------------------------------
+Query? Query: hello 
+No documents match.
+-----------------------------------------------
+Query? Query: hello or constant 
+No documents match.
+-----------------------------------------------
+Query? 
+# wikipedia testing with depth 1
+./querier $sharedOut/wikipedia-1 $sharedOut/wikipedia-1.index < testFiles/formattingTestQueries
+Query? Query: 
+-----------------------------------------------
+Query? Query: sadfdasdsaffds 
+No documents match.
+-----------------------------------------------
+Query? Query: 
+-----------------------------------------------
+Query? Query: adfasdf adsds fdsfds d fdsdf sdfs dfs adfoi adsoif jdaio aj 
+No documents match.
+-----------------------------------------------
+Query? Query: hello 
+Matched 1 documents:
+score  8 doc  6: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/C_(programming_language).html
+-----------------------------------------------
+Query? Query: hello or constant 
+Matched 3 documents:
+score  19 doc  3: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Hash_table.html
+score  13 doc  2: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Linked_list.html
+score  10 doc  6: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/C_(programming_language).html
+-----------------------------------------------
+Query? 
+# Test cases with valgrind with valid arguments and valid queries (with extra white spaces or capitalizations)
+# letters testing with depth 10
+$check ./querier $sharedOut/letters-10 $sharedOut/letters-10.index < testFiles/formattingTestQueries
+==12465== Memcheck, a memory error detector
+==12465== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==12465== Using Valgrind-3.13.0 and LibVEX; rerun with -h for copyright info
+==12465== Command: ./querier /thayerfs/home/f004gx3/cs50-dev/shared/tse/output/letters-10 /thayerfs/home/f004gx3/cs50-dev/shared/tse/output/letters-10.index
+==12465== 
+Query? Query: 
+-----------------------------------------------
+Query? Query: sadfdasdsaffds 
+No documents match.
+-----------------------------------------------
+Query? Query: 
+-----------------------------------------------
+Query? Query: adfasdf adsds fdsfds d fdsdf sdfs dfs adfoi adsoif jdaio aj 
+No documents match.
+-----------------------------------------------
+Query? Query: hello 
+No documents match.
+-----------------------------------------------
+Query? Query: hello or constant 
+No documents match.
+-----------------------------------------------
+Query? ==12465== 
+==12465== HEAP SUMMARY:
+==12465==     in use at exit: 0 bytes in 0 blocks
+==12465==   total heap usage: 192 allocs, 192 frees, 31,221 bytes allocated
+==12465== 
+==12465== All heap blocks were freed -- no leaks are possible
+==12465== 
+==12465== For counts of detected and suppressed errors, rerun with: -v
+==12465== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+
+# wikipedia testing with depth 1
+$check ./querier $sharedOut/wikipedia-1 $sharedOut/wikipedia-1.index < testFiles/formattingTestQueries
+==12466== Memcheck, a memory error detector
+==12466== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==12466== Using Valgrind-3.13.0 and LibVEX; rerun with -h for copyright info
+==12466== Command: ./querier /thayerfs/home/f004gx3/cs50-dev/shared/tse/output/wikipedia-1 /thayerfs/home/f004gx3/cs50-dev/shared/tse/output/wikipedia-1.index
+==12466== 
+Query? Query: 
+-----------------------------------------------
+Query? Query: sadfdasdsaffds 
+No documents match.
+-----------------------------------------------
+Query? Query: 
+-----------------------------------------------
+Query? Query: adfasdf adsds fdsfds d fdsdf sdfs dfs adfoi adsoif jdaio aj 
+No documents match.
+-----------------------------------------------
+Query? Query: hello 
+Matched 1 documents:
+score  8 doc  6: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/C_(programming_language).html
+-----------------------------------------------
+Query? Query: hello or constant 
+Matched 3 documents:
+score  19 doc  3: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Hash_table.html
+score  13 doc  2: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Linked_list.html
+score  10 doc  6: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/C_(programming_language).html
+-----------------------------------------------
+Query? ==12466== 
+==12466== HEAP SUMMARY:
+==12466==     in use at exit: 0 bytes in 0 blocks
+==12466==   total heap usage: 45,103 allocs, 45,103 frees, 1,157,474 bytes allocated
+==12466== 
+==12466== All heap blocks were freed -- no leaks are possible
+==12466== 
+==12466== For counts of detected and suppressed errors, rerun with: -v
+==12466== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+
+
+# Test cases with valid arguments and valid queries
+# letters testing with depth 10
+./querier $sharedOut/letters-10 $sharedOut/letters-10.index < testFiles/fuzzTestQueriesLetters10
+Query? Query: fourier and traversal 
+No documents match.
+-----------------------------------------------
+Query? Query: this or the the or tse computational 
+Matched 1 documents:
+score  2 doc  1: http://cs50tse.cs.dartmouth.edu/tse/letters/index.html
+-----------------------------------------------
+Query? Query: biology playground or computational 
+Matched 1 documents:
+score  1 doc  9: http://cs50tse.cs.dartmouth.edu/tse/letters/C.html
+-----------------------------------------------
+Query? Query: answers breadth search or computational or mississippians or fast 
+Matched 2 documents:
+score  1 doc  9: http://cs50tse.cs.dartmouth.edu/tse/letters/C.html
+score  1 doc  7: http://cs50tse.cs.dartmouth.edu/tse/letters/F.html
+-----------------------------------------------
+Query? Query: algorithm or coding eniac the and home or breadth 
+Matched 2 documents:
+score  1 doc  2: http://cs50tse.cs.dartmouth.edu/tse/letters/A.html
+score  1 doc  3: http://cs50tse.cs.dartmouth.edu/tse/letters/B.html
+-----------------------------------------------
+Query? Query: traversal computational playground coding or the 
+Matched 1 documents:
+score  1 doc  1: http://cs50tse.cs.dartmouth.edu/tse/letters/index.html
+-----------------------------------------------
+Query? Query: fast 
+Matched 1 documents:
+score  1 doc  7: http://cs50tse.cs.dartmouth.edu/tse/letters/F.html
+-----------------------------------------------
+Query? Query: search the or fast 
+Matched 1 documents:
+score  1 doc  7: http://cs50tse.cs.dartmouth.edu/tse/letters/F.html
+-----------------------------------------------
+Query? Query: home 
+Matched 9 documents:
+score  2 doc  1: http://cs50tse.cs.dartmouth.edu/tse/letters/index.html
+score  1 doc  2: http://cs50tse.cs.dartmouth.edu/tse/letters/A.html
+score  1 doc  3: http://cs50tse.cs.dartmouth.edu/tse/letters/B.html
+score  1 doc  4: http://cs50tse.cs.dartmouth.edu/tse/letters/E.html
+score  1 doc  5: http://cs50tse.cs.dartmouth.edu/tse/letters/G.html
+score  1 doc  6: http://cs50tse.cs.dartmouth.edu/tse/letters/H.html
+score  1 doc  7: http://cs50tse.cs.dartmouth.edu/tse/letters/F.html
+score  1 doc  8: http://cs50tse.cs.dartmouth.edu/tse/letters/D.html
+score  1 doc  9: http://cs50tse.cs.dartmouth.edu/tse/letters/C.html
+-----------------------------------------------
+Query? Query: transform or huffman or depth and graph and transform 
+Matched 2 documents:
+score  1 doc  7: http://cs50tse.cs.dartmouth.edu/tse/letters/F.html
+score  1 doc  6: http://cs50tse.cs.dartmouth.edu/tse/letters/H.html
+-----------------------------------------------
+Query? 
+# wikipedia testing with depth 1
+./querier $sharedOut/wikipedia-1 $sharedOut/wikipedia-1.index < testFiles/fuzzTestQueriesWikipedia1
+Query? Query: dereferencing and charinsert 
+Matched 1 documents:
+score  1 doc  6: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/C_(programming_language).html
+-----------------------------------------------
+Query? Query: bruce or limburgs houston or encoded smtp 
+Matched 1 documents:
+score  2 doc  7: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Computer_science.html
+-----------------------------------------------
+Query? Query: explained ford or has 
+Matched 6 documents:
+score  28 doc  6: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/C_(programming_language).html
+score  26 doc  4: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dartmouth_College.html
+score  19 doc  3: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Hash_table.html
+score  17 doc  7: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Computer_science.html
+score  16 doc  2: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Linked_list.html
+score  8 doc  5: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Unix.html
+-----------------------------------------------
+Query? Query: answers affordable opposed or strung or mississippians or foundation 
+Matched 6 documents:
+score  5 doc  4: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dartmouth_College.html
+score  2 doc  7: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Computer_science.html
+score  2 doc  5: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Unix.html
+score  1 doc  2: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Linked_list.html
+score  1 doc  3: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Hash_table.html
+score  1 doc  6: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/C_(programming_language).html
+-----------------------------------------------
+Query? Query: interpreters or acm stem modules and templates or violations 
+Matched 4 documents:
+score  3 doc  6: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/C_(programming_language).html
+score  2 doc  5: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Unix.html
+score  1 doc  3: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Hash_table.html
+score  1 doc  7: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Computer_science.html
+-----------------------------------------------
+Query? Query: handles manually johnson pioneers or puzzle 
+Matched 1 documents:
+score  1 doc  6: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/C_(programming_language).html
+-----------------------------------------------
+Query? Query: karl 
+Matched 2 documents:
+score  2 doc  3: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Hash_table.html
+score  1 doc  4: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dartmouth_College.html
+-----------------------------------------------
+Query? Query: alphabetically quickly or city 
+Matched 1 documents:
+score  2 doc  4: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dartmouth_College.html
+-----------------------------------------------
+Query? Query: appealed 
+Matched 1 documents:
+score  1 doc  5: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Unix.html
+-----------------------------------------------
+Query? Query: diagnostic or polski or encoding and cmp and creator 
+Matched 6 documents:
+score  2 doc  6: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/C_(programming_language).html
+score  1 doc  2: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Linked_list.html
+score  1 doc  3: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Hash_table.html
+score  1 doc  4: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dartmouth_College.html
+score  1 doc  5: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Unix.html
+score  1 doc  7: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Computer_science.html
+-----------------------------------------------
+Query? 
+# Test cases with valgrind with valid arguments and valid queries
+# letters testing with depth 10
+$check ./querier $sharedOut/letters-10 $sharedOut/letters-10.index < testFiles/fuzzTestQueriesLetters10
+==12519== Memcheck, a memory error detector
+==12519== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==12519== Using Valgrind-3.13.0 and LibVEX; rerun with -h for copyright info
+==12519== Command: ./querier /thayerfs/home/f004gx3/cs50-dev/shared/tse/output/letters-10 /thayerfs/home/f004gx3/cs50-dev/shared/tse/output/letters-10.index
+==12519== 
+Query? Query: fourier and traversal 
+No documents match.
+-----------------------------------------------
+Query? Query: this or the the or tse computational 
+Matched 1 documents:
+score  2 doc  1: http://cs50tse.cs.dartmouth.edu/tse/letters/index.html
+-----------------------------------------------
+Query? Query: biology playground or computational 
+Matched 1 documents:
+score  1 doc  9: http://cs50tse.cs.dartmouth.edu/tse/letters/C.html
+-----------------------------------------------
+Query? Query: answers breadth search or computational or mississippians or fast 
+Matched 2 documents:
+score  1 doc  9: http://cs50tse.cs.dartmouth.edu/tse/letters/C.html
+score  1 doc  7: http://cs50tse.cs.dartmouth.edu/tse/letters/F.html
+-----------------------------------------------
+Query? Query: algorithm or coding eniac the and home or breadth 
+Matched 2 documents:
+score  1 doc  2: http://cs50tse.cs.dartmouth.edu/tse/letters/A.html
+score  1 doc  3: http://cs50tse.cs.dartmouth.edu/tse/letters/B.html
+-----------------------------------------------
+Query? Query: traversal computational playground coding or the 
+Matched 1 documents:
+score  1 doc  1: http://cs50tse.cs.dartmouth.edu/tse/letters/index.html
+-----------------------------------------------
+Query? Query: fast 
+Matched 1 documents:
+score  1 doc  7: http://cs50tse.cs.dartmouth.edu/tse/letters/F.html
+-----------------------------------------------
+Query? Query: search the or fast 
+Matched 1 documents:
+score  1 doc  7: http://cs50tse.cs.dartmouth.edu/tse/letters/F.html
+-----------------------------------------------
+Query? Query: home 
+Matched 9 documents:
+score  2 doc  1: http://cs50tse.cs.dartmouth.edu/tse/letters/index.html
+score  1 doc  2: http://cs50tse.cs.dartmouth.edu/tse/letters/A.html
+score  1 doc  3: http://cs50tse.cs.dartmouth.edu/tse/letters/B.html
+score  1 doc  4: http://cs50tse.cs.dartmouth.edu/tse/letters/E.html
+score  1 doc  5: http://cs50tse.cs.dartmouth.edu/tse/letters/G.html
+score  1 doc  6: http://cs50tse.cs.dartmouth.edu/tse/letters/H.html
+score  1 doc  7: http://cs50tse.cs.dartmouth.edu/tse/letters/F.html
+score  1 doc  8: http://cs50tse.cs.dartmouth.edu/tse/letters/D.html
+score  1 doc  9: http://cs50tse.cs.dartmouth.edu/tse/letters/C.html
+-----------------------------------------------
+Query? Query: transform or huffman or depth and graph and transform 
+Matched 2 documents:
+score  1 doc  7: http://cs50tse.cs.dartmouth.edu/tse/letters/F.html
+score  1 doc  6: http://cs50tse.cs.dartmouth.edu/tse/letters/H.html
+-----------------------------------------------
+Query? ==12519== 
+==12519== HEAP SUMMARY:
+==12519==     in use at exit: 0 bytes in 0 blocks
+==12519==   total heap usage: 466 allocs, 466 frees, 211,483 bytes allocated
+==12519== 
+==12519== All heap blocks were freed -- no leaks are possible
+==12519== 
+==12519== For counts of detected and suppressed errors, rerun with: -v
+==12519== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+
+# wikipedia testing with depth 1
+$check ./querier $sharedOut/wikipedia-1 $sharedOut/wikipedia-1.index < testFiles/fuzzTestQueriesWikipedia1
+==12526== Memcheck, a memory error detector
+==12526== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==12526== Using Valgrind-3.13.0 and LibVEX; rerun with -h for copyright info
+==12526== Command: ./querier /thayerfs/home/f004gx3/cs50-dev/shared/tse/output/wikipedia-1 /thayerfs/home/f004gx3/cs50-dev/shared/tse/output/wikipedia-1.index
+==12526== 
+Query? Query: dereferencing and charinsert 
+Matched 1 documents:
+score  1 doc  6: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/C_(programming_language).html
+-----------------------------------------------
+Query? Query: bruce or limburgs houston or encoded smtp 
+Matched 1 documents:
+score  2 doc  7: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Computer_science.html
+-----------------------------------------------
+Query? Query: explained ford or has 
+Matched 6 documents:
+score  28 doc  6: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/C_(programming_language).html
+score  26 doc  4: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dartmouth_College.html
+score  19 doc  3: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Hash_table.html
+score  17 doc  7: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Computer_science.html
+score  16 doc  2: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Linked_list.html
+score  8 doc  5: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Unix.html
+-----------------------------------------------
+Query? Query: answers affordable opposed or strung or mississippians or foundation 
+Matched 6 documents:
+score  5 doc  4: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dartmouth_College.html
+score  2 doc  7: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Computer_science.html
+score  2 doc  5: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Unix.html
+score  1 doc  2: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Linked_list.html
+score  1 doc  3: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Hash_table.html
+score  1 doc  6: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/C_(programming_language).html
+-----------------------------------------------
+Query? Query: interpreters or acm stem modules and templates or violations 
+Matched 4 documents:
+score  3 doc  6: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/C_(programming_language).html
+score  2 doc  5: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Unix.html
+score  1 doc  3: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Hash_table.html
+score  1 doc  7: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Computer_science.html
+-----------------------------------------------
+Query? Query: handles manually johnson pioneers or puzzle 
+Matched 1 documents:
+score  1 doc  6: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/C_(programming_language).html
+-----------------------------------------------
+Query? Query: karl 
+Matched 2 documents:
+score  2 doc  3: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Hash_table.html
+score  1 doc  4: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dartmouth_College.html
+-----------------------------------------------
+Query? Query: alphabetically quickly or city 
+Matched 1 documents:
+score  2 doc  4: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dartmouth_College.html
+-----------------------------------------------
+Query? Query: appealed 
+Matched 1 documents:
+score  1 doc  5: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Unix.html
+-----------------------------------------------
+Query? Query: diagnostic or polski or encoding and cmp and creator 
+Matched 6 documents:
+score  2 doc  6: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/C_(programming_language).html
+score  1 doc  2: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Linked_list.html
+score  1 doc  3: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Hash_table.html
+score  1 doc  4: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dartmouth_College.html
+score  1 doc  5: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Unix.html
+score  1 doc  7: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Computer_science.html
+-----------------------------------------------
+Query? ==12526== 
+==12526== HEAP SUMMARY:
+==12526==     in use at exit: 0 bytes in 0 blocks
+==12526==   total heap usage: 45,426 allocs, 45,426 frees, 1,382,665 bytes allocated
+==12526== 
+==12526== All heap blocks were freed -- no leaks are possible
+==12526== 
+==12526== For counts of detected and suppressed errors, rerun with: -v
+==12526== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
